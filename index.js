@@ -37,7 +37,7 @@ async function fetchEvents() {
   }
 }
 
-PARTY_FORM.addEventListener("submit", function (event) {
+PARTY_FORM.addEventListener("submit", async function (event) {
   event.preventDefault();
   const newParty = {
     name: PARTY_NAME.value,
@@ -46,7 +46,8 @@ PARTY_FORM.addEventListener("submit", function (event) {
     location: PARTY_LOCATION.value,
   };
   console.log(newParty);
-  createEvent(newParty);
+  await createEvent(newParty);
+  fetchEvents();
 });
 
 async function createEvent(event) {
