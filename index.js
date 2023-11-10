@@ -15,10 +15,17 @@ const PARTY_TIME = document.getElementById("partyTime");
 const events = [];
 
 function renderEvents(events) {
+  PARTY_LIST.innerHTML = "";
   for (let event of events) {
     const eventListItem = document.createElement("li");
     eventListItem.textContent = `Name: ${event.name} Description: ${event.description} Date: ${event.date} Location: ${event.location}`;
-    PARTY_LIST.append(eventListItem);
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", async () => {
+      await deleteEvent(event.id);
+      fetchEvents();
+    });
+    PARTY_LIST.append(eventListItem, deleteButton);
   }
 }
 
@@ -42,7 +49,7 @@ PARTY_FORM.addEventListener("submit", async function (event) {
   const newParty = {
     name: PARTY_NAME.value,
     description: PARTY_DESCRIPTION.value,
-    date: `${PARTY_DATE.value}T${PARTY_TIME.value}:00Z`,
+    date: new Date(`${PARTY_DATE.value}T${PARTY_TIME.value}`).toISOString(),
     location: PARTY_LOCATION.value,
   };
   console.log(newParty);
@@ -61,9 +68,21 @@ async function createEvent(event) {
       console.log("API error", response);
       return;
     }
-    const jsonResponse = await response.json();
-    const events = jsonResponse.data;
-    console.log(events);
+  } catch (err) {
+    console.error(err);
+  }
+}
+async function deleteEvent(id) {
+  // console.log("deleted");
+  try {
+    const response = await fetch(`${EVENTS_ENDPOINT}/${id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!response.ok) {
+      console.log("API error", response);
+      return;
+    }
   } catch (err) {
     console.error(err);
   }
