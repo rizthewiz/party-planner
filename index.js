@@ -2,7 +2,8 @@ const BASE_URL =
   "https://fsa-crud-2aa9294fe819.herokuapp.com/api/2308-acc-et-web-pt-b";
 const EVENTS_ENDPOINT = `${BASE_URL}/events`;
 // const RSVP_ENDPOINT = `${BASE_URL}/rsvps`;
-// const GUESTS_ENDPOINT = `${BASE_URL}/guests`;
+// attempting to do guests on my own. No data to pull from rsvps 1st thing I did
+const GUESTS_ENDPOINT = `${BASE_URL}/guests`;
 
 const PARTY_LIST = document.getElementById("partyList");
 const PARTY_FORM = document.getElementById("partyForm");
@@ -11,8 +12,11 @@ const PARTY_DATE = document.getElementById("partyDate");
 const PARTY_DESCRIPTION = document.getElementById("partyDescription");
 const PARTY_LOCATION = document.getElementById("partyLocation");
 const PARTY_TIME = document.getElementById("partyTime");
+const GUEST_LIST = document.getElementById("guestList");
 
 const events = [];
+// 2nd thing i did was create guests array to track the guest objs
+const guests = [];
 
 function renderEvents(events) {
   PARTY_LIST.innerHTML = "";
@@ -26,6 +30,22 @@ function renderEvents(events) {
       fetchEvents();
     });
     PARTY_LIST.append(eventListItem, deleteButton);
+  }
+}
+// will place render(guests) here
+function renderGuests(guests) {
+  GUEST_LIST.textContent = "Guest List";
+  for (const guest of guests) {
+    const guestCard = document.createElement("div");
+    const guestName = document.createElement("p");
+    guestName.textContent = `Name: ${guest.name}`;
+    const guestEmail = document.createElement("p");
+    guestEmail.textContent = `E-mail: ${guest.email}`;
+    const guestNumber = document.createElement("p");
+    guestNumber.textContent = `Number: ${guest.phone}`;
+    guestCard.replaceChildren(guestName, guestEmail, guestNumber);
+    console.log(guestCard);
+    GUEST_LIST.append(guestCard);
   }
 }
 
@@ -44,6 +64,22 @@ async function fetchEvents() {
   }
 }
 
+// will place fetch(guests) here
+async function getGuests() {
+  try {
+    const response = await fetch(GUESTS_ENDPOINT);
+    if (!response.ok) {
+      console.log("Guest API Error", response.status);
+      return;
+    }
+    const jsonResponse = await response.json();
+    const guests = jsonResponse.data;
+    renderGuests(guests);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 PARTY_FORM.addEventListener("submit", async function (event) {
   event.preventDefault();
   const newParty = {
@@ -56,6 +92,11 @@ PARTY_FORM.addEventListener("submit", async function (event) {
   await createEvent(newParty);
   fetchEvents();
 });
+
+// will place event listener
+// would like to try right click
+// then are you sure can't be undone option prior to deletion
+// upon user selecting yes delete, if no go back to normal page view
 
 async function createEvent(event) {
   try {
@@ -72,6 +113,9 @@ async function createEvent(event) {
     console.error(err);
   }
 }
+
+// will place add(guests) here
+
 async function deleteEvent(id) {
   // console.log("deleted");
   try {
@@ -88,4 +132,8 @@ async function deleteEvent(id) {
   }
 }
 
+// will place delete (guests) here
+
 fetchEvents();
+// renderGuests(guests);
+getGuests();
