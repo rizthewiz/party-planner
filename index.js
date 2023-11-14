@@ -13,10 +13,13 @@ const PARTY_DESCRIPTION = document.getElementById("partyDescription");
 const PARTY_LOCATION = document.getElementById("partyLocation");
 const PARTY_TIME = document.getElementById("partyTime");
 const GUEST_LIST = document.getElementById("guestList");
+const ADD_GUEST = document.createElement("button");
 
 const events = [];
 // 2nd thing i did was create guests array to track the guest objs
 const guests = [];
+// holds on to guest info
+let user = {};
 
 function renderEvents(events) {
   PARTY_LIST.innerHTML = "";
@@ -35,6 +38,7 @@ function renderEvents(events) {
 // will place render(guests) here
 function renderGuests(guests) {
   GUEST_LIST.textContent = "Guest List";
+  ADD_GUEST.textContent = "ADD GUEST";
   for (const guest of guests) {
     const guestCard = document.createElement("div");
     const guestName = document.createElement("p");
@@ -43,9 +47,13 @@ function renderGuests(guests) {
     guestEmail.textContent = `E-mail: ${guest.email}`;
     const guestNumber = document.createElement("p");
     guestNumber.textContent = `Number: ${guest.phone}`;
-    guestCard.replaceChildren(guestName, guestEmail, guestNumber);
+    const removeGuest = document.createElement("button");
+    removeGuest.textContent = "Remove";
+    guestCard.replaceChildren(guestName, guestEmail, guestNumber, removeGuest);
     console.log(guestCard);
-    GUEST_LIST.append(guestCard);
+    GUEST_LIST.append(guestCard, ADD_GUEST);
+    // would like to try remove button that gives are you sure can't be undone option prior to deletion
+    // upon user selecting yes delete, if no go back to normal page view
   }
 }
 
@@ -65,7 +73,7 @@ async function fetchEvents() {
 }
 
 // will place fetch(guests) here
-async function getGuests() {
+async function fetchGuests() {
   try {
     const response = await fetch(GUESTS_ENDPOINT);
     if (!response.ok) {
@@ -93,10 +101,24 @@ PARTY_FORM.addEventListener("submit", async function (event) {
   fetchEvents();
 });
 
-// will place event listener
-// would like to try right click
-// then are you sure can't be undone option prior to deletion
-// upon user selecting yes delete, if no go back to normal page view
+// will place event listeners here
+// add button will create form to fill out
+
+ADD_GUEST.addEventListener("click", () => {
+  const modal = document.querySelector(".modal");
+  console.log(modal);
+  modal.style.display = "flex";
+  const guestForm = document.querySelector("#guestForm");
+  guestForm.addEventListener("submit", async (e) => {
+    // onsubmit change display back to none
+    e.preventDefault();
+    const formData = new FormData(guestForm);
+    const newGuest = Object.fromEntries(formData.entries());
+    await addGuest(newGuest);
+    modal.style.display = "none";
+    fetchGuests();
+  });
+});
 
 async function createEvent(event) {
   try {
@@ -115,6 +137,21 @@ async function createEvent(event) {
 }
 
 // will place add(guests) here
+async function addGuest(guest) {
+  try {
+    const response = await fetch(GUESTS_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(guest),
+    });
+    if (!response.ok) {
+      console.log("Add Guest API error", response);
+      return;
+    }
+  } catch (err) {
+    console.eror(err);
+  }
+}
 
 async function deleteEvent(id) {
   // console.log("deleted");
@@ -136,4 +173,4 @@ async function deleteEvent(id) {
 
 fetchEvents();
 // renderGuests(guests);
-getGuests();
+fetchGuests();

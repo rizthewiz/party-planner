@@ -37,6 +37,25 @@
 
     <h2 id="guestList"></h2>
 
+    <div class="modal">
+      <form action="" id="guestForm">
+        New Guest Info
+        <br />
+        <input type="name" name="name" />
+        <label for="name">Name</label>
+        <input type="email" name="email" />
+        <label for="email">E-mail</label>
+        <input
+          type="tel"
+          name="phone"
+          placeholder="123-867-5309"
+          pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+        />
+        <label for="tel">Phone Number</label>
+        <button type="submit">Add</button>
+      </form>
+    </div>
+
     <script src="index.js"></script>
   </body>
 </html>
