@@ -14,6 +14,7 @@ const PARTY_LOCATION = document.getElementById("partyLocation");
 const PARTY_TIME = document.getElementById("partyTime");
 const GUEST_LIST = document.getElementById("guestList");
 const ADD_GUEST = document.createElement("button");
+const DIALOG_VIEW = document.querySelector("dialog");
 
 const events = [];
 // 2nd thing i did was create guests array to track the guest objs
@@ -54,6 +55,27 @@ function renderGuests(guests) {
     GUEST_LIST.append(guestCard, ADD_GUEST);
     // would like to try remove button that gives are you sure can't be undone option prior to deletion
     // upon user selecting yes delete, if no go back to normal page view
+    // will place delete (guests) here
+    removeGuest.addEventListener("click", () => {
+      DIALOG_VIEW.showModal();
+      const warning = document.querySelector("#warning");
+      const cancel = document.querySelector("#cancel");
+      const remove = document.querySelector("#delete");
+      const uninvited = guest.name;
+      warning.textContent = `Clicking "Delete" will remove ${uninvited} from guest list. This cannot be undone. Are you sure that's what you want to do?`;
+      // DIALOG_VIEW.close() to close
+      cancel.addEventListener("click", () => {
+        DIALOG_VIEW.close();
+      });
+      remove.addEventListener("click", async () => {
+        await deleteGuest(guest.id);
+        warning.textContent = `${uninvited} successfully deleted from guest list.`;
+        setTimeout(() => {
+          DIALOG_VIEW.close();
+        }, 3000);
+        fetchGuests();
+      });
+    });
   }
 }
 
@@ -169,7 +191,20 @@ async function deleteEvent(id) {
   }
 }
 
-// will place delete (guests) here
+async function deleteGuest(id) {
+  try {
+    const response = await fetch(`${GUESTS_ENDPOINT}/${id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!response.ok) {
+      console.log("API error", response);
+      return;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 fetchEvents();
 // renderGuests(guests);
